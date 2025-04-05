@@ -1,0 +1,28 @@
+.sport-menu {
+    display: flex;
+    justify-content: flesx-start;
+    align-items: left;
+    background-color: #1e1e1e;
+    padding: 10px;
+    overflow-x: auto;
+}
+
+.sport-menu-item {
+    background-color: #282828;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    margin: 0 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.sport-menu-item:hover {
+    background-color: #3a3a3a;
+}
+
+.error {
+    color: red;
+    margin-right: 10px;
+}

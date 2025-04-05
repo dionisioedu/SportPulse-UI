@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './LeagueSidebar.css';
 
-const LeagueSidebar = ({ apiUrl }) => {
+const LeagueSidebar = ({ apiUrl, onSelectLeague }) => {
   const [leagues, setLeagues] = useState([]);
 
   useEffect(() => {
@@ -23,7 +23,8 @@ const LeagueSidebar = ({ apiUrl }) => {
       <h2>Leagues</h2>
       <ul>
         {leagues.map(league => (
-          <li key={league.idLeague} className="league-item">
+          <li key={league.idLeague} className="league-item" 
+            onClick={() => onSelectLeague && onSelectLeague(league)}>
             <div className="league-name">{league.strLeague}</div>
             <div className="league-sport">{league.strSport}</div>
           </li>

@@ -2,21 +2,25 @@
 
 import React, { useEffect, useState } from 'react';
 import LeagueSidebar from './LeagueSidebar';
+import SportMenu from './SportMenu';
 import { fetchSports, fetchCountries } from '../services/api';
 import './Dashboard.css';
 
 const Dashboard = () => {
     const apiUrl = process.env.REACT_APP_API_URL;
 
-    const [sports, setSports] = useState([]);
     const [countries, setCountries] = useState([]);
     const [error, setError] = useState('');
 
-    useEffect(() => {
-        fetchSports()
-            .then(data => setSports(data))
-            .catch(err => setError(err.message));
+    const handleSelectSport = (sport) => {
+        console.log("Sport selected:", sport);
+    };
 
+    const handleSelectLeague = (league) => {
+        console.log("League selected:", league);
+    };
+
+    useEffect(() => {
         fetchCountries()
             .then(data => setCountries(data))
             .catch(err => setError(err.message));
@@ -24,19 +28,10 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard">
-            <LeagueSidebar apiUrl={apiUrl}/>
+            <LeagueSidebar apiUrl={apiUrl} onSelectLeague={handleSelectLeague}/>
             <div className="main-content">
+                <SportMenu apiUrl={apiUrl} onSelectSport={handleSelectSport} />
                 {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-                <section>
-                    <h2>Sports</h2>
-                    <ul>
-                        {sports.map((sport) => (
-                            <li key={sport.idSport}>
-                                {sport.strSport}
-                            </li>
-                        ))}
-                    </ul>
-                </section>
                 <section>
                     <h2>Countries</h2>
                     <ul>
