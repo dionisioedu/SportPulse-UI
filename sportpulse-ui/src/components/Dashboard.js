@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import LeagueSidebar from './LeagueSidebar';
 import SportMenu from './SportMenu';
-import { fetchSports, fetchCountries } from '../services/api';
+import { fetchCountries } from '../services/api';
 import './Dashboard.css';
 
 const Dashboard = () => {
