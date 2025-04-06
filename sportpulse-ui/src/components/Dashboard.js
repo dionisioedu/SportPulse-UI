@@ -3,13 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import LeagueSidebar from './LeagueSidebar';
 import SportMenu from './SportMenu';
-import { fetchCountries } from '../services/api';
+import CountryCards from './CountryCards';
 import './Dashboard.css';
 
 const Dashboard = () => {
     const apiUrl = process.env.REACT_APP_API_URL;
 
-    const [countries, setCountries] = useState([]);
     const [error, setError] = useState('');
 
     const handleSelectSport = (sport) => {
@@ -20,28 +19,19 @@ const Dashboard = () => {
         console.log("League selected:", league);
     };
 
-    useEffect(() => {
-        fetchCountries()
-            .then(data => setCountries(data))
-            .catch(err => setError(err.message));
-    }, []);
+    const handleSelectCountry = (country) => {
+        console.log("Country selected:", country);
+    };
 
     return (
         <div className="dashboard">
-            <LeagueSidebar apiUrl={apiUrl} onSelectLeague={handleSelectLeague}/>
+            <div className="sidebar">
+                <LeagueSidebar apiUrl={apiUrl} onSelectLeague={handleSelectLeague}/>
+            </div>
             <div className="main-content">
                 <SportMenu apiUrl={apiUrl} onSelectSport={handleSelectSport} />
                 {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-                <section>
-                    <h2>Countries</h2>
-                    <ul>
-                        {countries.map((country, index) => (
-                            <li key={index}>
-                                {country.name}
-                            </li>
-                        ))}
-                    </ul>
-                </section>
+                <CountryCards apiUrl={apiUrl} onSelectCountry={handleSelectCountry} />
             </div>
         </div>
     );
