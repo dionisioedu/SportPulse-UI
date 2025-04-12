@@ -1,4 +1,4 @@
-// src/components/Dashboard.js
+// src/components/Dashboard.jsx
 
 import React, { useState, useEffect } from 'react';
 import LeagueSidebar from './LeagueSidebar';
@@ -15,20 +15,7 @@ const Dashboard = () => {
     const [searchText, setSearchText] = useState('');
     const [searchResults, setSearchResults] = useState([]);
 
-    const handleSelectSport = (sport) => {
-        console.log("Sport selected:", sport);
-    };
-
-    const handleSelectLeague = (league) => {
-        console.log("League selected:", league);
-    };
-
-    const handleSelectCountry = (country) => {
-        console.log("Country selected:", country);
-    };
-
     const handleSearchChange = (text) => {
-        console.log("Search text changed: ", text);
         setSearchText(text);
     };
 
@@ -39,6 +26,18 @@ const Dashboard = () => {
         }
 
         const timeoutId = setTimeout(() => {
+            fetch(`${apiUrl}/searchTeamsByShortCode?shortCode=${searchText}`)
+                .then((res) => {
+                    if (!res.ok) throw new Error('Search error');
+                    return res.json();
+                })
+                .then((data) => {
+                    setSearchResults(data);
+                })
+                .catch((err) => {
+                    console.error(err);
+                    setError(err.message);
+                });
             fetch(`${apiUrl}/searchTeamsByName?teamName=${searchText}`)
                 .then((res) => {
                     if (!res.ok) throw new Error('Search error');
@@ -58,26 +57,28 @@ const Dashboard = () => {
 
     return (
         <div className="dashboard">
-            <div className="sidebar">
-                <Search apiUrl={apiUrl} onSearchChange={handleSearchChange}/>
-                <LeagueSidebar apiUrl={apiUrl} onSelectLeague={handleSelectLeague}/>
+            <div className="visible">
+                <LeagueSidebar apiUrl={apiUrl} onSelectLeague={(league) => console.log("League:", league)} />
             </div>
+
             <div className="main-content">
-                <SportMenu apiUrl={apiUrl} onSelectSport={handleSelectSport} />
-                {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+                <div className="top-bar">
+                    <SportMenu apiUrl={apiUrl} onSelectSport={(sport) => console.log("Sport:", sport)} />
+                    <Search apiUrl={apiUrl} onSearchChange={handleSearchChange} />
+                </div>
+
+                {error && <p className="error">Error: {error}</p>}
 
                 {searchResults.length > 0 && (
                     <div className="searchResults">
                         <h2>Search results:</h2>
-                        <ul>
                         {searchResults.map((team) => (
                             <TeamCard key={team.idTeam} team={team} />
                         ))}
-                        </ul>
                     </div>
                 )}
 
-                <CountryCards apiUrl={apiUrl} onSelectCountry={handleSelectCountry} />
+                <CountryCards apiUrl={apiUrl} onSelectCountry={(c) => console.log("Country:", c)} />
             </div>
         </div>
     );

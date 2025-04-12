@@ -11,13 +11,13 @@ const Search = ({ apiUrl, onSearchChange }) => {
     };
 
     return (
-        <div className="Search">
+        <div className="search">
             <input
-                type="text"
+                type="search"
                 value={value}
                 onChange={onTextChange}
                 placeholder="Search..."
-                className="search"
+                className="search-input"
             />
         </div>
     );

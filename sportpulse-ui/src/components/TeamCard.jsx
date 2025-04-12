@@ -6,18 +6,22 @@ const TeamCard = ({ team }) => {
     return (
         <div className="team-card">
             {team.strFanart1 && (
-                <div className="team-banner" style={{ backgroundImage: `url(${team.strFanart1})` }}></div>
+                <div className="team-fanart" style={{ backgroundImage: `url(${team.strFanart1})` }}></div>
             )}
             <div className="team-header">
                 {team.strBadge && <img src={team.strBadge} alt="Team Badge" className="team-badge" />}
                 <div>
                     <h2>{team.strTeam}</h2>
                     <p>{team.strLeague} • {team.strCountry}</p>
+                    <p>{team.strDivision}</p>
                 </div>
             </div>
-            <p><strong>Founded:</strong> {team.intFormedYear}</p>
-            <p><strong>Stadium:</strong> {team.strStadium} ({team.intStadiumCapacity} lugares)</p>
-            <p className="description">{team.strDescriptionEN}...</p>
+            <p className="subtitle"><strong>Formed:</strong> {team.intFormedYear}</p>
+            <p className="subtitle"><strong>Stadium:</strong> {team.strStadium} ({team.intStadiumCapacity} places) • {team.strLocation}</p>
+
+            <img className="team-banner" src={team.strBanner} alt="Team Banner"/>
+
+            <p className="description">{team.strDescriptionEN}</p>
 
             <div className="social-links">
                 {team.strWebsite && <a href={team.strWebsite} target="_blank" rel="noreferrer">🌐 Website</a>}

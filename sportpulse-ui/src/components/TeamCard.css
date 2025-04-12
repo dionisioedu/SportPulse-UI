@@ -5,13 +5,23 @@
     margin: 20px 0;
     background-color: #fff;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-    max-width: 600px;
+    max-width: 100%;
+    text-align: left;
+    padding: 0px;
 }
 
-.team-banner {
+.subtitle {
+    padding: 4px 16px 8px 16px;
+}
+
+.team-fanart {
     height: 180px;
     background-size: cover;
     background-position: center;
+}
+
+.team-banner {
+    margin: 16px;
 }
 
 .team-header {
@@ -26,7 +36,7 @@
 }
 
 .description {
-    padding: 0 16px;
+    padding: 16px;
     color: #444;
 }
 
