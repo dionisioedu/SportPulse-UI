@@ -24,36 +24,42 @@ const Dashboard = () => {
             setSearchResults([]);
             return;
         }
-
+    
         const timeoutId = setTimeout(() => {
-            fetch(`${apiUrl}/searchTeamsByShortCode?shortCode=${searchText}`)
-                .then((res) => {
-                    if (!res.ok) throw new Error('Search error');
-                    return res.json();
-                })
-                .then((data) => {
-                    setSearchResults(data);
-                })
-                .catch((err) => {
-                    console.error(err);
-                    setError(err.message);
-                });
-            fetch(`${apiUrl}/searchTeamsByName?teamName=${searchText}`)
-                .then((res) => {
-                    if (!res.ok) throw new Error('Search error');
-                    return res.json();
-                })
-                .then((data) => {
-                    setSearchResults(data);
-                })
-                .catch((err) => {
-                    console.error(err);
-                    setError(err.message);
-                });
+            Promise.allSettled([
+                fetch(`${apiUrl}/searchTeamsByShortCode?shortCode=${searchText}`)
+                    .then(res => res.ok ? res.json() : Promise.reject('ShortCode search error')),
+                fetch(`${apiUrl}/searchTeamsByName?teamName=${searchText}`)
+                    .then(res => res.ok ? res.json() : Promise.reject('Name search error')),
+            ])
+            .then(results => {
+                const successfulResults = results
+                    .filter(result => result.status === 'fulfilled')
+                    .flatMap(result => result.value);
+    
+                setSearchResults(successfulResults);
+    
+                const errors = results
+                    .filter(result => result.status === 'rejected')
+                    .map(result => result.reason);
+    
+                if (errors.length > 0) {
+                    console.warn("Some requests failed:", errors);
+                    setError(errors.join('; '));
+                } else {
+                    setError('');
+                }
+            })
+            .catch(err => {
+                // This shouldn't be triggered with allSettled, but kept for safety
+                console.error(err);
+                setError(err.toString());
+            });
         }, 500);
-
+    
         return () => clearTimeout(timeoutId);
     }, [searchText, apiUrl]);
+    
 
     return (
         <div className="dashboard">
