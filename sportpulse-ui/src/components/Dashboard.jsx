@@ -14,9 +14,14 @@ const Dashboard = () => {
     const [error, setError] = useState('');
     const [searchText, setSearchText] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const handleSearchChange = (text) => {
         setSearchText(text);
+    };
+
+    const toggleSidebar = () => {
+        setSidebarOpen(!sidebarOpen);
     };
 
     useEffect(() => {
@@ -24,7 +29,7 @@ const Dashboard = () => {
             setSearchResults([]);
             return;
         }
-    
+
         const timeoutId = setTimeout(() => {
             Promise.allSettled([
                 fetch(`${apiUrl}/searchTeamsByShortCode?shortCode=${searchText}`)
@@ -36,13 +41,21 @@ const Dashboard = () => {
                 const successfulResults = results
                     .filter(result => result.status === 'fulfilled')
                     .flatMap(result => result.value);
-    
-                setSearchResults(successfulResults);
-    
+
+                // Remove duplicados com base no idTeam
+                const uniqueResultsMap = new Map();
+                successfulResults.forEach(team => {
+                    if (!uniqueResultsMap.has(team.idTeam)) {
+                        uniqueResultsMap.set(team.idTeam, team);
+                    }
+                });
+
+                setSearchResults(Array.from(uniqueResultsMap.values()));
+
                 const errors = results
                     .filter(result => result.status === 'rejected')
                     .map(result => result.reason);
-    
+
                 if (errors.length > 0) {
                     console.warn("Some requests failed:", errors);
                     setError(errors.join('; '));
@@ -51,19 +64,21 @@ const Dashboard = () => {
                 }
             })
             .catch(err => {
-                // This shouldn't be triggered with allSettled, but kept for safety
                 console.error(err);
                 setError(err.toString());
             });
         }, 500);
-    
+
         return () => clearTimeout(timeoutId);
     }, [searchText, apiUrl]);
-    
 
     return (
         <div className="dashboard">
-            <div className="visible">
+            <button className="toggle-button" onClick={toggleSidebar}>
+                ☰
+            </button>
+
+            <div className={`sidebar ${sidebarOpen ? '' : 'hidden'}`}>
                 <LeagueSidebar apiUrl={apiUrl} onSelectLeague={(league) => console.log("League:", league)} />
             </div>
 
@@ -78,7 +93,7 @@ const Dashboard = () => {
                 {searchResults.length > 0 && (
                     <div className="searchResults">
                         <h2>Search results:</h2>
-                        {searchResults.map((team) => (
+                        {searchResults.map(team => (
                             <TeamCard key={team.idTeam} team={team} />
                         ))}
                     </div>
