@@ -24,7 +24,7 @@ const LeagueSidebar = ({ apiUrl, onSelectLeague }) => {
       <ul>
         {leagues.map(league => (
           <li key={league.idLeague} className="league-item" 
-            onClick={() => onSelectLeague && onSelectLeague(league)}>
+            onClick={() => onSelectLeague && onSelectLeague(league.idLeague)}>
             <div className="league-name">{league.strLeague}</div>
             <div className="league-sport">{league.strSport}</div>
           </li>

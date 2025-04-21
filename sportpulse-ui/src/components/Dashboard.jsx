@@ -7,6 +7,7 @@ import CountryCards from './CountryCards';
 import Search from './Search';
 import TeamCard from './TeamCard';
 import PlayerCard from './PlayerCard';
+import LeagueCard from './LeagueCard';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -17,8 +18,10 @@ const Dashboard = () => {
     const [teamResults, setTeamResults] = useState([]);
     const [playerResults, setPlayerResults] = useState([]);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [selectedLeague, setSelectedLeague] = useState(null);
 
     const handleSearchChange = (text) => {
+        setSelectedLeague(null);
         setSearchText(text);
     };
 
@@ -104,7 +107,32 @@ const Dashboard = () => {
             </button>
 
             <div className={`sidebar ${sidebarOpen ? '' : 'hidden'}`}>
-                <LeagueSidebar apiUrl={apiUrl} onSelectLeague={(league) => console.log("League:", league)} />
+            <LeagueSidebar
+                apiUrl={apiUrl}
+                onSelectLeague={(leagueId) => {
+                    console.log("Fetching League Details:", leagueId);
+                    fetch(`${apiUrl}/league?id=${leagueId}`)
+                        .then(res => res.ok ? res.json() : Promise.reject('Failed to fetch league'))
+                        .then(data => {
+                            console.log("📦 League response:", data);
+                            if (Array.isArray(data) && data.length > 0) {
+                                setPlayerResults([]);
+                                setTeamResults([]);
+                                setSelectedLeague(data[0]);
+                                setError('');
+                            } else {
+                                setError('League not found');
+                                setSelectedLeague(null);
+                            }
+                        })
+                        .catch(err => {
+                            console.error("❌ Error fetching league:", err);
+                            setError(err.toString());
+                            setSelectedLeague(null);
+                        });
+                }}
+            />
+
             </div>
 
             <div className="main-content">
@@ -114,6 +142,13 @@ const Dashboard = () => {
                 </div>
 
                 {error && <p className="error">Error: {error}</p>}
+
+                {selectedLeague && (
+                    <div className="searchResults">
+                        <h2>Selected League:</h2>
+                        <LeagueCard league={selectedLeague} />
+                    </div>
+                )}
 
                 {teamResults.length > 0 && (
                     <div className="searchResults">
