@@ -14,7 +14,7 @@ function App() {
         <Dashboard />
       </main>
       <footer>
-        <p>© 2025 SportPulse. All rights reserved. By <a href="https://dionisio.dev"><strong>Dionisio</strong></a>.</p>
+        <p>© 2026 SportPulse. All rights reserved. By <a href="https://dionisio.dev"><strong>Dionisio</strong></a>.</p>
       </footer>
     </div>
   );
