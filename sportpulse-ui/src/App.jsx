@@ -4,6 +4,8 @@ import PulseHeader from "./components/PulseHeader.jsx";
 import PostCard from "./components/PostCard.jsx";
 import { fetchFeed, subscribeToPulse } from "./api/api.js";
 
+const MAX_ITEMS = 300; // keep only the most recent N posts
+
 function useInfiniteScroll(onBottom) {
   const ref = useRef(null);
 
@@ -89,15 +91,15 @@ export default function App() {
           if (fresh.length === 0) return prev;
 
           // coloca os novos no topo
-          return [...fresh, ...prev].slice(0, 150);
+          return [...fresh, ...prev].slice(0, MAX_ITEMS);
         });
 
         // label do mais novo recebido
-        setPulseLabel(posts[0].title);
+        setPulseLabel(fresh[0]?.title ?? posts[0].title);
       },
       onError: (e) => {
         // opcional: debug
-        // console.log("pulse error:", e);
+        console.log("pulse error:", e);
       },
     });
 
