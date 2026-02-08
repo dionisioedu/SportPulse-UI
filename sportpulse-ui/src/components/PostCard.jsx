@@ -1,7 +1,7 @@
 import React from "react";
 
 export default function PostCard({ post }) {
-  const dt = new Date(post.createdAt);
+  const dt = new Date(post.createdAt || post.publishedAt * 1000 || Date.now());
   const time = dt.toLocaleString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
   return (

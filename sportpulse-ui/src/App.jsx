@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import PulseHeader from "./components/PulseHeader.jsx";
 import PostCard from "./components/PostCard.jsx";
-import { ensureSeed, fetchFeed, subscribeToPulse } from "./mock/mockApi.js";
+import { fetchFeed, subscribeToPulse } from "./api/api.js";
 
 function useInfiniteScroll(onBottom) {
   const ref = useRef(null);
@@ -43,8 +43,8 @@ function IconPulse() {
 export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem("sp_theme_v2") || "dark");
   const [query, setQuery] = useState("");
-  const [items, setItems] = useState(() => ensureSeed(18));
-  const [cursor, setCursor] = useState(() => 0);
+  const [items, setItems] = useState(() => []);
+  const [cursor, setCursor] = useState(() => "0");
   const [hasMore, setHasMore] = useState(true);
   const [pulseLabel, setPulseLabel] = useState("Notícias relevantes em tempo real");
 
@@ -53,25 +53,54 @@ export default function App() {
     localStorage.setItem("sp_theme_v2", theme);
   }, [theme]);
 
-  // Carrega primeira página (mantém seed inicial, mas sincroniza cursor)
+  // Carrega primeira página
   useEffect(() => {
+    let alive = true;
+
     (async () => {
-      const page = await fetchFeed({ cursor: 0, limit: 18 });
+      const page = await fetchFeed({ cursor: "0", limit: 18 });
+      if (!alive) return;
+
       setItems(page.items);
-      setCursor(page.nextCursor ?? page.items.length);
-      setHasMore(page.nextCursor !== null);
+      setCursor(page.nextCursor ?? null);
+      setHasMore(page.nextCursor !== null && page.nextCursor !== "");
+
+      // guarda o maior publishedAt pra iniciar o pulse sem duplicar
+      const startSince = Math.max(...page.items.map(p => Number(p.publishedAt || 0)), 0);
+      window.__sp_startSince = startSince; // simples: stash (opcional)
     })();
+
+    return () => { alive = false; };
   }, []);
 
-  // “Pulse” (post novo entra no topo)
+   // “Pulse” (posts novos entram no topo)
   useEffect(() => {
+    const startSince = Number(window.__sp_startSince || 0);
+
     const unsubscribe = subscribeToPulse({
       intervalMs: 4500,
-      onNewPost: (post) => {
-        setItems((prev) => [post, ...prev].slice(0, 150));
-        setPulseLabel(post.title);
-      }
+      startSince, // importantíssimo: começa do que você já tem
+      onNewPosts: (posts) => {
+        if (!posts || posts.length === 0) return;
+
+        setItems((prev) => {
+          const ids = new Set(prev.map((p) => p.id));
+          const fresh = posts.filter((p) => p?.id && !ids.has(p.id));
+          if (fresh.length === 0) return prev;
+
+          // coloca os novos no topo
+          return [...fresh, ...prev].slice(0, 150);
+        });
+
+        // label do mais novo recebido
+        setPulseLabel(posts[0].title);
+      },
+      onError: (e) => {
+        // opcional: debug
+        // console.log("pulse error:", e);
+      },
     });
+
     return unsubscribe;
   }, []);
 
@@ -85,11 +114,12 @@ export default function App() {
   }, [items, query]);
 
   const loadMore = async () => {
-    if (!hasMore) return;
-    const page = await fetchFeed({ cursor, limit: 12 });
+    if (!hasMore || !cursor) return;
+
+    const page = await fetchFeed({ cursor: String(cursor), limit: 12 });
     setItems((prev) => [...prev, ...page.items]);
-    setCursor(page.nextCursor ?? cursor + page.items.length);
-    setHasMore(page.nextCursor !== null);
+    setCursor(page.nextCursor ?? null);
+    setHasMore(page.nextCursor !== null && page.nextCursor !== "");
   };
 
   const sentinelRef = useInfiniteScroll(loadMore);
